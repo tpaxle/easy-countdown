@@ -7,7 +7,7 @@ on:
       - master
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-push:
@@ -15,12 +15,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Generate version
+        with:
+          fetch-depth: 0
+      - name: Generate semantic version
         id: version
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
         run: |
-          BASE_VERSION=$(node -p "require('./package.json').version")
-          IFS=. read -r major minor _ <<< "$BASE_VERSION"
-          echo "value=$major.$minor.$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          node scripts/next-version.cjs
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Log in to Docker Hub
@@ -35,7 +37,15 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            APP_VERSION=${{ steps.version.outputs.value }}
+            APP_VERSION=${{ steps.version.outputs.version }}
           tags: |
             tpaxle/easy-countdown:latest
-            tpaxle/easy-countdown:${{ steps.version.outputs.value }}
+            tpaxle/easy-countdown:${{ steps.version.outputs.version }}
+      - name: Create semantic version tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"

@@ -1,59 +1,106 @@
-![Client CI](https://github.com/Yooooomi/easy-countdown/workflows/Client%20CI/badge.svg)
+[![Client CI](https://github.com/tpaxle/easy-countdown/actions/workflows/client.yml/badge.svg)](https://github.com/tpaxle/easy-countdown/actions/workflows/client.yml)
 
-![gif](https://user-images.githubusercontent.com/17204739/88205741-825e7d00-cc4d-11ea-81c3-92e42d197346.gif)
+![Easy Countdown preview](https://user-images.githubusercontent.com/17204739/88205741-825e7d00-cc4d-11ea-81c3-92e42d197346.gif)
 
-# Easy countdown
+# Easy Countdown
 
-Easy countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer
+Easy Countdown is a single-page web application that displays the time
+remaining until a target date or the time elapsed since it. The background,
+date, and title can be customized.
 
-## Versioning
+This repository is a **fork** of
+[Yooooomi/easy-countdown](https://github.com/Yooooomi/easy-countdown). It
+retains the original project's concept and foundation while adding changes
+such as the migration to Vite, visual improvements, and automated image
+publishing.
 
-Each push to `master` publishes `tpaxle/easy-countdown` with both the `latest`
-tag and a version tag. The version uses the package's major and minor numbers
-with the increasing GitHub Actions run number as its patch number, and is shown
-in the bottom-right corner of the app.
+## Technical documentation
 
-# Setup
+### Architecture
 
-## Using docker (Recommended)
+- **Frontend:** React 18 with Vite. The app mounts its main scene in
+  `src/index.jsx`; the countdown screen and its components are in
+  `src/scenes/Home/`.
+- **Countdown calculation:** `src/service/date.js` breaks down the difference
+  between the current date and the target date into days, hours, minutes, and
+  seconds.
+- **Configuration:** `public/variables.js` contains placeholders for the
+  background, date, and title. `variables.sh` replaces them when starting the
+  server or preparing the build, allowing configuration through environment
+  variables.
+- **Build:** Vite generates static files in `dist/`.
+- **Container:** the `Dockerfile` builds the app and serves it on port `3000`.
 
-If you use docker, just edit the `docker-compose.yml` file so that it fits your needs
+### Configuration
 
-|Variables|Definition|Example|
-|-|-|-|
-|TIMER_BACKGROUND|The url of an image that will be used for as background|https://wallpaperplay.com/walls/full/0/7/6/29912.jpg|
-|TIMER_TARGET|The target date of the countdown, if date is in the future, timer will decrease, otherwise it will increase|Fri Oct 01 2021 15:33:36 GMT+0200|
-|TIMER_TITLE|The title of the countdown, can be empty|My title!|
+| Variable | Description | Example |
+| --- | --- | --- |
+| `TIMER_BACKGROUND` | URL of the background image | `https://example.com/background.jpg` |
+| `TIMER_TARGET` | Target date and time; any date format understood by JavaScript is accepted | `2027-01-03T22:34:11+01:00` |
+| `TIMER_TITLE` | Optional title | `My next birthday` |
 
-### Example of `docker-compose.yml` file
+### Run with Docker
 
-> This example is a copy-paste of `docker-compose.production.yml` in the repo
+To pull and run the published image:
 
-```yml
-version: "3.8"
-
-services:
-  web:
-    stdin_open: true # So that the serving is not exited with code 0
-    image: yooooomi/easy-countdown
-    environment:
-      TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
-      TIMER_TARGET: "Fri Oct 01 2021 15:33:36 GMT+0200" # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
-      TIMER_TITLE: "My next birthday" # Can be empty
-    ports:
-      - "3000:3000"
+```sh
+docker run --rm -p 3000:3000 \
+  -e TIMER_BACKGROUND="https://example.com/background.jpg" \
+  -e TIMER_TARGET="2027-01-03T22:34:11+01:00" \
+  -e TIMER_TITLE="My next birthday" \
+  tpaxle/easy-countdown:latest
 ```
 
-## Without docker
+Then open <http://localhost:3000>.
 
-> This method builds the project following the env variables you gave, producing a `build` folder that has to be served manually afterwards. You can use [`serve`](https://www.npmjs.com/package/serve) to achieve it
+To build and run the repository's local configuration:
 
-Use `yarn` to use the build script from the 
-`package.json`. Simply use `yarn build`. Use the variables above in the env to personalize your countdown
+```sh
+docker compose up --build
+```
 
-- `npm install`
-- `TIMER_TITLE="example" yarn build`
+### Development and checks
 
-> Variables will be taken from env, and are the same as above
+Requires Node.js 22 or later.
 
-I.E: `TIMER_TARGET="Fri Oct 01 2021 15:33:36 GMT+0200" yarn build && serve -s -l tcp://0.0.0.0:3000 build/`
+```sh
+npm ci
+npm run dev
+```
+
+Run tests and create a production build:
+
+```sh
+npm test
+npm run build
+```
+
+The production build is output to `dist/`. The `docker-compose.dev.yml` file
+configures Vite's development mode when used together with
+`docker-compose.yml`:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+### CI, versions, and Docker image
+
+The `.github/workflows/client.yml` workflow runs on every push to `master` and
+uses Conventional Commits to determine the next Semantic Versioning release:
+
+- `fix: ...` and other commit types increment the patch version.
+- `feat: ...` increments the minor version.
+- `feat!: ...` or a `BREAKING CHANGE: ...` footer increments the major version.
+
+For example, `feat!: change the target date format` marks a breaking change.
+From version `0.1.0`, this produces version `1.0.0`.
+
+Each release is recorded as a Git tag (`v<version>`). The version appears in
+the bottom-right corner of the app. The image is published for `linux/amd64`
+and `linux/arm64` with two tags:
+
+- `tpaxle/easy-countdown:latest`
+- `tpaxle/easy-countdown:<version>`
+
+The workflow requires the GitHub secrets `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN`, with permission to publish to Docker Hub.

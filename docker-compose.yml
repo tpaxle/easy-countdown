@@ -9,8 +9,8 @@ services:
       args:
         ENVIRONMENT: "PRODUCTION"
     environment:
-      TIMER_BACKGROUND: https://wallpaperplay.com/walls/full/0/7/6/29912.jpg
-      TIMER_TARGET: "Wed Oct 28 2020 00:00:00 GMT+0100" # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
-      TIMER_TITLE: "My birthday in"
+      TIMER_BACKGROUND: https://wallpapercat.com/w/full/b/8/e/195983-2560x1600-desktop-hd-birthday-party-wallpaper-image.jpg
+      TIMER_TARGET: "Sun Jan 03 2027 22:34:11 GMT+0100" # Get help with https://esqsoft.com/javascript_examples/date-to-epoch.htm
+      TIMER_TITLE: "Nicolas's Day"
     ports:
       - "3000:3000"

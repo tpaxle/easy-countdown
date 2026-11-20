@@ -3,13 +3,15 @@ import s from './index.module.css';
 import { describe } from '../../service/date';
 import Block from './Block';
 
-let end = window.target;
+const end = window.target instanceof Date
+  ? window.target
+  : new Date(window.target);
 
 function Home() {
   const [date, setDate] = useState(new Date());
 
   useEffect(() => {
-    document.title = window.title || "Easy countdown"
+    document.title = window.title || "Easy countdown";
     const inter = setInterval(() => setDate(new Date()), 1000);
     return () => clearInterval(inter);
   }, []);

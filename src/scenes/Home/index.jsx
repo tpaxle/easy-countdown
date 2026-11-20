@@ -2,10 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import s from './index.module.css';
 import { describe } from '../../service/date';
 import Block from './Block';
+import packageJson from '../../../package.json';
 
 const end = window.target instanceof Date
   ? window.target
   : new Date(window.target);
+const version = import.meta.env.VITE_APP_VERSION || packageJson.version;
 
 function Home() {
   const [date, setDate] = useState(new Date());
@@ -35,6 +37,7 @@ function Home() {
           ))}
         </div>
       </div>
+      <div className={s.version}>v{version}</div>
     </div>
   );
 }

@@ -6,6 +6,13 @@
 
 Easy countdown is an easy to setup countdown page. Can be setup as a countdown or as a timer
 
+## Versioning
+
+Each push to `master` publishes `tpaxle/easy-countdown` with both the `latest`
+tag and a version tag. The version uses the package's major and minor numbers
+with the increasing GitHub Actions run number as its patch number, and is shown
+in the bottom-right corner of the app.
+
 # Setup
 
 ## Using docker (Recommended)

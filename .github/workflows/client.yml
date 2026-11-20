@@ -15,6 +15,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Generate version
+        id: version
+        run: |
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          IFS=. read -r major minor _ <<< "$BASE_VERSION"
+          echo "value=$major.$minor.$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Log in to Docker Hub
@@ -28,4 +34,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: tpaxle/easy-countdown:latest
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.value }}
+          tags: |
+            tpaxle/easy-countdown:latest
+            tpaxle/easy-countdown:${{ steps.version.outputs.value }}
